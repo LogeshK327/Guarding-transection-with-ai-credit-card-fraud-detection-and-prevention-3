@@ -14,6 +14,9 @@ np.random.seed(42)
 # Streamlit app title
 st.title("Fraud Detection with Random Forest")
 
+# Display the date and time
+st.write("**Date and Time:** 03:39 PM IST on Tuesday, May 13, 2025")
+
 # Sidebar for user interaction
 st.sidebar.header("Model Controls")
 train_button = st.sidebar.button("Train Model")
