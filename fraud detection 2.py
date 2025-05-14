@@ -7,8 +7,9 @@ from sklearn.metrics import classification_report, confusion_matrix, accuracy_sc
 from sklearn.model_selection import train_test_split
 import joblib
 import matplotlib.pyplot as plt
-import requests
-import io
+import os
+import zipfile
+import kaggle
 
 # Set random seed for reproducibility
 np.random.seed(42)
@@ -17,39 +18,55 @@ np.random.seed(42)
 st.title("Fraud Detection with Random Forest")
 
 # Display the updated date and time
-st.write("**Date and Time:** 03:09 PM IST on Wednesday, May 14, 2025")
+st.write("**Date and Time:** 03:17 PM IST on Wednesday, May 14, 2025")
 
 # Sidebar for user interaction
 st.sidebar.header("Model Controls")
 train_button = st.sidebar.button("Train Model")
 
-# Step 1: Load dataset from a cloud storage URL with API key
-st.header("Dataset from Cloud Storage (API Key Protected)")
-# Replace this base URL with the URL of your dataset (without the API key)
-base_url = "YOUR_CLOUD_STORAGE_BASE_URL_HERE"  # Example: https://drive.google.com/uc?export=download&id=FILE_ID
+# Step 1: Authenticate with Kaggle API and download the dataset
+st.header("Dataset from Kaggle")
 
-# Access the API key from Streamlit secrets
+# Access the Kaggle API key from Streamlit secrets
 try:
-    api_key = st.secrets["API_KEY"]
+    kaggle_api_key = st.secrets["KAGGLE_API_KEY"]
 except KeyError:
-    st.error("API_KEY not found in Streamlit secrets. Please set it in .streamlit/secrets.toml or Streamlit Cloud settings.")
+    st.error("KAGGLE_API_KEY not found in Streamlit secrets. Please set it in .streamlit/secrets.toml or Streamlit Cloud settings.")
     st.stop()
 
-# Construct the full URL with the API key
-data_url = f"{base_url}?api_key={api_key}"
+# Set Kaggle API credentials
+os.environ["KAGGLE_USERNAME"] = "your_kaggle_username"  # Replace with your Kaggle username
+os.environ["KAGGLE_KEY"] = kaggle_api_key
 
-# Fetch the dataset using requests
+# Initialize Kaggle API
 try:
-    response = requests.get(data_url)
-    response.raise_for_status()  # Raise an error for bad status codes
-    # Load the dataset into a Pandas DataFrame from the response content
-    df = pd.read_csv(io.BytesIO(response.content))
-    st.dataframe(df)
-except requests.exceptions.RequestException as e:
-    st.error(f"Error fetching dataset: {e}")
-    st.stop()
+    kaggle.api.authenticate()
 except Exception as e:
-    st.error(f"Error loading dataset into DataFrame: {e}")
+    st.error(f"Error authenticating with Kaggle API: {e}")
+    st.stop()
+
+# Download the dataset (e.g., creditcardfraud dataset)
+dataset = "creditcardfraud/creditcard.csv"  # Kaggle dataset path
+download_path = "./dataset"
+
+try:
+    # Download the dataset as a ZIP file
+    kaggle.api.dataset_download_files(dataset, path=download_path, unzip=False)
+    
+    # Extract the ZIP file
+    zip_path = os.path.join(download_path, "creditcard.csv.zip")
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        zip_ref.extractall(download_path)
+    
+    # Load the dataset into a Pandas DataFrame
+    csv_path = os.path.join(download_path, "creditcard.csv")
+    df = pd.read_csv(csv_path)
+    st.dataframe(df)
+    
+    # Clean up downloaded files (optional)
+    os.remove(zip_path)
+except Exception as e:
+    st.error(f"Error downloading or loading dataset from Kaggle: {e}")
     st.stop()
 
 # Step 2: Data Preprocessing and Model Training
