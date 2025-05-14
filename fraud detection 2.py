@@ -18,7 +18,7 @@ np.random.seed(42)
 st.title("Fraud Detection with Random Forest")
 
 # Display the updated date and time
-st.write("**Date and Time:** 03:30 PM IST on Wednesday, May 14, 2025")
+st.write("**Date and Time:** 03:41 PM IST on Wednesday, May 14, 2025")
 
 # Sidebar for user interaction
 st.sidebar.header("Model Controls")
@@ -35,7 +35,7 @@ except KeyError:
     st.stop()
 
 # Set Kaggle API credentials
-os.environ["KAGGLE_USERNAME"] = "LogeshK327"  # Updated with your Kaggle username
+os.environ["KAGGLE_USERNAME"] = "LogeshK327"  # Your Kaggle username
 os.environ["KAGGLE_KEY"] = kaggle_api_key
 
 # Initialize Kaggle API
