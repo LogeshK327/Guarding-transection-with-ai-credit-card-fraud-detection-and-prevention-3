@@ -7,6 +7,8 @@ from sklearn.metrics import classification_report, confusion_matrix, accuracy_sc
 from sklearn.model_selection import train_test_split
 import joblib
 import matplotlib.pyplot as plt
+import requests
+import io
 
 # Set random seed for reproducibility
 np.random.seed(42)
@@ -14,26 +16,41 @@ np.random.seed(42)
 # Streamlit app title
 st.title("Fraud Detection with Random Forest")
 
-# Display the date and time
-st.write("**Date and Time:** 03:39 PM IST on Tuesday, May 13, 2025")
+# Display the updated date and time
+st.write("**Date and Time:** 02:44 PM IST on Wednesday, May 14, 2025")
 
 # Sidebar for user interaction
 st.sidebar.header("Model Controls")
 train_button = st.sidebar.button("Train Model")
 
-# Step 1: Create and display synthetic dataset
-st.header("Synthetic Dataset")
-data = {
-    'Time': [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
-    'Amount': [100.0, 50.0, 2000.0, 75.0, 150.0, 3000.0, 25.0, 500.0, 10000.0, 80.0],
-    'V1': [-1.359, 1.191, -5.0, 0.966, -0.185, -7.0, 1.792, -0.418, -10.0, 1.257],
-    'V2': [0.072, -0.173, 4.0, -0.287, 0.669, 5.5, -0.863, 0.403, 7.0, -0.211],
-    'V3': [2.536, 0.405, -6.0, 1.798, 1.974, -8.0, 0.095, 0.762, -12.0, 0.988],
-    'V4': [1.378, -0.338, 3.5, -0.094, 0.456, 4.0, -0.631, 0.175, 6.0, -0.403],
-    'Class': [0, 0, 1, 0, 0, 1, 0, 0, 1, 0]
-}
-df = pd.DataFrame(data)
-st.dataframe(df)
+# Step 1: Load dataset from a cloud storage URL with API key
+st.header("Dataset from Cloud Storage (API Key Protected)")
+# Replace this base URL with the URL of your dataset (without the API key)
+base_url = "YOUR_CLOUD_STORAGE_BASE_URL_HERE"  # Example: https://drive.google.com/uc?export=download&id=FILE_ID
+
+# Access the API key from Streamlit secrets
+try:
+    api_key = st.secrets["API_KEY"]
+except KeyError:
+    st.error("API_KEY not found in Streamlit secrets. Please set it in .streamlit/secrets.toml or Streamlit Cloud settings.")
+    st.stop()
+
+# Construct the full URL with the API key
+data_url = f"{base_url}?api_key={api_key}"
+
+# Fetch the dataset using requests
+try:
+    response = requests.get(data_url)
+    response.raise_for_status()  # Raise an error for bad status codes
+    # Load the dataset into a Pandas DataFrame from the response content
+    df = pd.read_csv(io.BytesIO(response.content))
+    st.dataframe(df)
+except requests.exceptions.RequestException as e:
+    st.error(f"Error fetching dataset: {e}")
+    st.stop()
+except Exception as e:
+    st.error(f"Error loading dataset into DataFrame: {e}")
+    st.stop()
 
 # Step 2: Data Preprocessing and Model Training
 if train_button:
