@@ -18,7 +18,7 @@ np.random.seed(42)
 st.title("Fraud Detection with Random Forest")
 
 # Display the updated date and time
-st.write("**Date and Time:** 03:17 PM IST on Wednesday, May 14, 2025")
+st.write("**Date and Time:** 03:30 PM IST on Wednesday, May 14, 2025")
 
 # Sidebar for user interaction
 st.sidebar.header("Model Controls")
@@ -35,7 +35,7 @@ except KeyError:
     st.stop()
 
 # Set Kaggle API credentials
-os.environ["KAGGLE_USERNAME"] = "your_kaggle_username"  # Replace with your Kaggle username
+os.environ["KAGGLE_USERNAME"] = "LogeshK327"  # Updated with your Kaggle username
 os.environ["KAGGLE_KEY"] = kaggle_api_key
 
 # Initialize Kaggle API
@@ -46,15 +46,19 @@ except Exception as e:
     st.stop()
 
 # Download the dataset (e.g., creditcardfraud dataset)
-dataset = "creditcardfraud/creditcard.csv"  # Kaggle dataset path
+dataset = "mlg-ulb/creditcardfraud"  # Corrected dataset path
 download_path = "./dataset"
 
 try:
+    # Create download directory if it doesn't exist
+    if not os.path.exists(download_path):
+        os.makedirs(download_path)
+    
     # Download the dataset as a ZIP file
     kaggle.api.dataset_download_files(dataset, path=download_path, unzip=False)
     
     # Extract the ZIP file
-    zip_path = os.path.join(download_path, "creditcard.csv.zip")
+    zip_path = os.path.join(download_path, "creditcardfraud.zip")  # Updated ZIP file name
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
         zip_ref.extractall(download_path)
     
